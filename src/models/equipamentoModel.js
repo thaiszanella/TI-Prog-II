@@ -97,10 +97,44 @@ function remover(id) {
   return true;
 }
 
+// Retorna true se todos os equipamentos necessários estão disponíveis na data
+function verificarDisponibilidade(
+  alocacoesNecessarias,
+  eventosExistentes,
+  dataHora,
+  id = null,
+) {
+  const dia = new Date(dataHora).toDateString();
+
+  // Soma o que já está alocado nesse dia (ignora cancelados e o próprio evento)
+  const alocado = {};
+  for (const e of eventosExistentes) {
+    if (e.status === "cancelado" || e.id === id) {
+      continue;
+    }
+
+    if (new Date(e.dataHora).toDateString() !== dia) {
+      continue;
+    }
+
+    for (const { equipamentoId, quantidade } of e.equipamentos || []) {
+      alocado[equipamentoId] = (alocado[equipamentoId] || 0) + quantidade;
+    }
+  }
+
+  return alocacoesNecessarias.every(({ equipamentoId, quantidade }) => {
+    const equip = equipamentos.find((e) => e.id === equipamentoId);
+    if (!equip) return false;
+    const disponivel = equip.quantidade - (alocado[equipamentoId] || 0);
+    return quantidade <= disponivel;
+  });
+}
+
 module.exports = {
   listarTodos,
   buscarPorId,
   criar,
   atualizar,
   remover,
+  verificarDisponibilidade,
 };
