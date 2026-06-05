@@ -132,7 +132,7 @@ function atualizar(id, dados) {
     }
   }
 
-  usuarios[idx] = { ...usuarios[idx], ...dados };
+  usuarios[idx] = { ...usuarios[idx], ...dados, id };
   return usuarios[idx];
 }
 
