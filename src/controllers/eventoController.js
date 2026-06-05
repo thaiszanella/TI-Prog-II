@@ -85,6 +85,19 @@ function equipamentosAlocados(req, res) {
   res.status(200).json({ alocacoes: alocacoes });
 }
 
+function remover(req, res) {
+  const id = parseInt(req.params.id);
+  if (isNaN(id)) {
+    return res.status(400).json({ erro: "ID inválido" });
+  }
+
+  const ok = EventoModel.remover(id);
+  if (!ok) {
+    return res.status(404).json({ erro: "Evento não encontrado" });
+  }
+  res.status(204).send();
+}
+
 module.exports = {
   listar,
   buscar,
@@ -94,4 +107,5 @@ module.exports = {
   finalizar,
   proximos,
   equipamentosAlocados,
+  remover,
 };

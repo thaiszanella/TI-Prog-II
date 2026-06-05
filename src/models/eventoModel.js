@@ -163,6 +163,16 @@ function listarEquipamentosAlocados() {
   return alocacoes;
 }
 
+//Remove evento por ID
+function remover(id) {
+  const idx = eventos.findIndex((e) => e.id === id);
+  if (idx === -1) {
+    return false;
+  }
+  eventos.splice(idx, 1);
+  return true;
+}
+
 module.exports = {
   listarTodos,
   buscarPorId,
@@ -172,4 +182,5 @@ module.exports = {
   atualizar,
   buscarProximos,
   listarEquipamentosAlocados,
+  remover,
 };

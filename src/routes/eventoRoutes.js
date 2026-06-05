@@ -10,5 +10,6 @@ router.post("/", EventoController.criar);
 router.patch("/:id", EventoController.atualizar);
 router.patch("/:id/cancelar", EventoController.cancelar);
 router.patch("/:id/finalizar", EventoController.finalizar);
+router.delete("/:id", EventoController.remover);
 
 module.exports = router;
