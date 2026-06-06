@@ -12,7 +12,7 @@ function listarTodos(filtros = {}) {
   }
 
   if (filtros.clienteId) {
-    resultado = resultado.filter((e) => e.clienteId === filtros.clienteId);
+    resultado = resultado.filter((e) => e.clienteId === Number(filtros.clienteId));
   }
 
   if (filtros.funcionarioId) {
@@ -114,11 +114,11 @@ function atualizar(id, dados) {
   const novaData = dados.dataHora ?? eventos[idx].dataHora;
 
   if (
-    equipamentosEvento.length > 0 &&
+    novosEquipamentos.length > 0 &&
     !EquipamentoModel.verificarDisponibilidade(
-      equipamentosEvento,
+      novosEquipamentos,
       eventos,
-      dataHora,
+      novaData,
       id,
     )
   ) {
