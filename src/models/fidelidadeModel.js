@@ -50,11 +50,11 @@ function adicionarPontos(clienteId, eventoId, avaliacao) {
 function resgatarPontos(clienteId, pontosUsados) {
   const registro = buscarPorCliente(clienteId);
 
-  if (!registro || registro.pontos < pontosUsados)
-    throw new Error("Pontos insuficientes para resgate");
-
   if (pontosUsados <= 0)
     throw new Error("Quantidade de pontos para resgate deve ser positiva");
+
+  if (!registro || registro.pontos < pontosUsados)
+    throw new Error("Pontos insuficientes para resgate");
 
   registro.pontos -= pontosUsados;
   registro.historico.push({
