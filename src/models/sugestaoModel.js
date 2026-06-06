@@ -28,7 +28,7 @@ function criar(dados) {
   const { eventoId, usuarioId, descricao } = dados;
 
   if (!eventoId || !usuarioId || !descricao) {
-    throw new Error("Campos obrigatórios ausentes");
+    throw new Error("Campos obrigatórios: eventoId, usuarioId e descricao");
   }
 
   const novaSugestao = {

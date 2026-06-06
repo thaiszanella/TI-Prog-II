@@ -30,7 +30,9 @@ function criar(dados) {
   const { nome, servicos } = dados;
 
   if (!nome || !Array.isArray(servicos) || servicos.length === 0) {
-    throw new Error("Campos obrigatórios ausentes");
+    throw new Error(
+      "Campos obrigatórios: nome, servicos (deve ser um array com ao menos um serviço)",
+    );
   }
 
   const novoPacote = {

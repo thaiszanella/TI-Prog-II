@@ -12,7 +12,9 @@ function listarTodos(filtros = {}) {
   }
 
   if (filtros.clienteId) {
-    resultado = resultado.filter((e) => e.clienteId === Number(filtros.clienteId));
+    resultado = resultado.filter(
+      (e) => e.clienteId === Number(filtros.clienteId),
+    );
   }
 
   if (filtros.funcionarioId) {
@@ -37,7 +39,9 @@ function criar(dados) {
     dados;
 
   if (!pacoteId || !clienteId || !dataHora || !duracao) {
-    throw new Error("Campos obrigatórios ausentes");
+    throw new Error(
+      "Campos obrigatórios: pacoteId, clienteId, dataHora, duracao",
+    );
   }
 
   if (!Array.isArray(funcionarios) || funcionarios.length === 0) {

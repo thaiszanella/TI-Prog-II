@@ -69,7 +69,9 @@ function criar(dados) {
     !areaAtuacao ||
     !senha
   ) {
-    throw new Error("Campos obrigatórios ausentes");
+    throw new Error(
+      "Campos obrigatórios: nome, email, cpf, cep, dataNascimento, telefone, areaAtuacao e senha",
+    );
   }
 
   if (emailJaCadastrado(email)) {

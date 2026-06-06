@@ -39,7 +39,7 @@ function criar(dados) {
   const { nome, descricao, valor } = dados;
 
   if (!nome || !valor) {
-    throw new Error("Campos obrigatórios ausentes");
+    throw new Error("Campos obrigatórios: nome e valor");
   }
 
   if (isNaN(valor) || valor < 0) {

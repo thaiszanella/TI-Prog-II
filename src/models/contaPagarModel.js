@@ -22,7 +22,9 @@ function criar(dados) {
   const { descricao, valor, dataEmissao, dataVencimento } = dados;
 
   if (!descricao || valor === undefined || !dataEmissao || !dataVencimento) {
-    throw new Error("Campos obrigatórios ausentes");
+    throw new Error(
+      "Campos obrigatórios: descricao, valor, dataEmissao, dataVencimento",
+    );
   }
 
   if (isNaN(valor) || valor <= 0) {

@@ -6,7 +6,9 @@ function listarTodos(filtros = {}) {
   let resultado = [...historico];
 
   if (filtros.clienteId) {
-    resultado = resultado.filter((h) => h.clienteId === Number(filtros.clienteId));
+    resultado = resultado.filter(
+      (h) => h.clienteId === Number(filtros.clienteId),
+    );
   }
 
   if (filtros.funcionarioId) {
@@ -34,7 +36,9 @@ function registrar(dados) {
   const { eventoId, clienteId, funcionarioId, tipoServico, valorTotal } = dados;
 
   if (!eventoId || !clienteId || !funcionarioId || !tipoServico || !valorTotal)
-    throw new Error("Campos obrigatórios ausentes");
+    throw new Error(
+      "Campos obrigatórios: eventoId, clienteId, funcionarioId, tipoServico, valorTotal",
+    );
 
   const percentualEmpresa =
     dados.percentualEmpresa !== undefined ? dados.percentualEmpresa : 50;
