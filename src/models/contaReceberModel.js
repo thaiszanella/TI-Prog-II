@@ -10,7 +10,7 @@ function listarTodos(filtros = {}) {
   }
 
   if (filtros.clienteId) {
-    resultado = resultado.filter((c) => c.clienteId === filtros.clienteId);
+    resultado = resultado.filter((c) => c.clienteId === Number(filtros.clienteId));
   }
 
   return resultado;
