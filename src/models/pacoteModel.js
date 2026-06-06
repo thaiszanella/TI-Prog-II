@@ -29,7 +29,7 @@ function buscarPorId(id) {
 function criar(dados) {
   const { nome, servicos } = dados;
 
-  if (!nome || servicos.length === 0) {
+  if (!nome || !Array.isArray(servicos) || servicos.length === 0) {
     throw new Error("Campos obrigatórios ausentes");
   }
 
