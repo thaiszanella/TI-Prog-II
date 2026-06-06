@@ -38,7 +38,6 @@ function criar(dados) {
     dataEmissao,
     dataVencimento,
     status: "pendente",
-    condicoesPagamento: dados.condicoesPagamento || null,
   };
 
   contasPagar.push(novaConta);

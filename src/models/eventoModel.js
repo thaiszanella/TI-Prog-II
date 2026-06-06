@@ -35,13 +35,10 @@ function buscarPorId(id) {
 //RF11 - Verifica disponibilidade de equipamentos na data
 //Cria evento e valida campos obrigatórios, disponibilidade de equipamentos e funcionários
 function criar(dados) {
-  const { pacoteId, clienteId, dataHora, duracao, funcionarios, equipamentos } =
-    dados;
+  const { pacoteId, clienteId, dataHora, funcionarios, equipamentos } = dados;
 
-  if (!pacoteId || !clienteId || !dataHora || !duracao) {
-    throw new Error(
-      "Campos obrigatórios: pacoteId, clienteId, dataHora, duracao",
-    );
+  if (!pacoteId || !clienteId || !dataHora) {
+    throw new Error("Campos obrigatórios: pacoteId, clienteId, dataHora");
   }
 
   if (!Array.isArray(funcionarios) || funcionarios.length === 0) {
@@ -66,8 +63,6 @@ function criar(dados) {
     pacoteId,
     clienteId,
     dataHora,
-    duracao,
-    informacoesExecucao: dados.informacoesExecucao || null,
     funcionarios,
     equipamentos: equipamentosEvento,
     status: "agendado",
