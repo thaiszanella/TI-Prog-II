@@ -6,7 +6,7 @@ function listarTodos(filtros = {}) {
   let resultado = [...historico];
 
   if (filtros.clienteId) {
-    resultado = resultado.filter((h) => h.clienteId === filtros.clienteId);
+    resultado = resultado.filter((h) => h.clienteId === Number(filtros.clienteId));
   }
 
   if (filtros.funcionarioId) {
