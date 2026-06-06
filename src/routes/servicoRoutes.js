@@ -5,7 +5,7 @@ const ServicoController = require("../controllers/servicoController");
 router.get("/", ServicoController.listar);
 router.get("/:id", ServicoController.buscar);
 router.post("/", ServicoController.criar);
-router.put("/:id", ServicoController.atualizar);
+router.patch("/:id", ServicoController.atualizar);
 router.delete("/:id", ServicoController.remover);
 
 module.exports = router;
