@@ -10,6 +10,7 @@ const contaPagarRoutes = require("./routes/contaPagarRoutes");
 const fidelidadeRoutes = require("./routes/fidelidadeRoutes");
 const historicoRoutes = require("./routes/historicoRoutes");
 const sugestaoRoutes = require("./routes/sugestaoRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
 
 const app = express();
 
@@ -34,6 +35,7 @@ app.use("/api/contas-pagar", contaPagarRoutes);
 app.use("/api/fidelidade", fidelidadeRoutes);
 app.use("/api/historico", historicoRoutes);
 app.use("/api/sugestoes", sugestaoRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 //Deve ser o último middleware
 app.use((err, req, res, next) => {
