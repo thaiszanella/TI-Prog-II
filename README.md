@@ -22,9 +22,8 @@ npm install
 ## Execução
 
 ```bash
-# Produção
 npm start
 
-# Desenvolvimento (hot reload)
+# hot reload
 npm run dev
 ```
