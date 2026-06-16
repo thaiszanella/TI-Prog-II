@@ -1,64 +1,79 @@
-const PacoteModel = require("../models/pacoteModel");
+const db = require("../models");
 
-function listar(req, res) {
-  const pacotes = PacoteModel.listarTodos();
-  res.status(200).json({ total: pacotes.length, pacotes });
-}
-
-function buscar(req, res) {
-  const id = parseInt(req.params.id);
-  if (isNaN(id)) {
-    return res.status(400).json({ erro: "ID inválido" });
-  }
-
-  const pacote = PacoteModel.buscarPorId(id);
-  if (!pacote) {
-    return res.status(404).json({ erro: "Pacote não encontrado" });
-  }
-
-  res.status(200).json(pacote);
-}
-
-function criar(req, res) {
+async function listar(req, res) {
   try {
-    const novoPacote = PacoteModel.criar(req.body);
+    const pacotes = await db.Pacote.findAll();
+    res.status(200).json({ total: pacotes.length, pacotes });
+  } catch (err) {
+    res.status(500).json({ erro: "Erro interno" });
+  }
+}
+
+async function buscar(req, res) {
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ erro: "ID inválido" });
+    }
+
+    const pacote = await db.Pacote.findByPk(id);
+    if (!pacote) {
+      return res.status(404).json({ erro: "Pacote não encontrado" });
+    }
+
+    res.status(200).json(pacote);
+  } catch (err) {
+    res.status(500).json({ erro: "Erro interno" });
+  }
+}
+
+async function criar(req, res) {
+  try {
+    const novoPacote = await db.Pacote.create(req.body);
     res
       .status(201)
       .set("Location", "/api/pacotes/" + novoPacote.id)
       .json(novoPacote);
   } catch (err) {
-    res.status(400).json({ erro: err.message });
+    res.status(500).json({ erro: "Erro interno" });
   }
 }
 
-function atualizar(req, res) {
-  const id = parseInt(req.params.id);
-  if (isNaN(id)) {
-    return res.status(400).json({ erro: "ID inválido" });
-  }
-
+async function atualizar(req, res) {
   try {
-    const pacote = PacoteModel.atualizar(id, req.body);
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ erro: "ID inválido" });
+    }
+
+    const pacote = await db.Pacote.findByPk(id);
     if (!pacote) {
       return res.status(404).json({ erro: "Pacote não encontrado" });
     }
+
+    await pacote.update(req.body);
     res.status(200).json(pacote);
   } catch (err) {
-    res.status(400).json({ erro: err.message });
+    res.status(500).json({ erro: "Erro interno" });
   }
 }
 
-function remover(req, res) {
-  const id = parseInt(req.params.id);
-  if (isNaN(id)) {
-    return res.status(400).json({ erro: "ID inválido" });
-  }
+async function remover(req, res) {
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ erro: "ID inválido" });
+    }
 
-  const ok = PacoteModel.remover(id);
-  if (!ok) {
-    return res.status(404).json({ erro: "Pacote não encontrado" });
+    const deletado = await db.Pacote.destroy({ where: { id } });
+    if (!deletado) {
+      return res.status(404).json({ erro: "Pacote não encontrado" });
+    }
+
+    res.status(204).send();
+  } catch (err) {
+    res.status(500).json({ erro: "Erro interno" });
   }
-  res.status(204).send();
 }
 
 module.exports = { listar, buscar, criar, atualizar, remover };

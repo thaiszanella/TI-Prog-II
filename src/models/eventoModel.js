@@ -1,185 +1,43 @@
-const EquipamentoModel = require("./equipamentoModel");
+"use strict";
+module.exports = (sequelize, DataTypes) => {
+  const Evento = sequelize.define(
+    "Evento",
+    {
+      id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+      pacoteId: { type: DataTypes.INTEGER, allowNull: false },
+      clienteId: { type: DataTypes.INTEGER, allowNull: false },
+      dataHora: { type: DataTypes.DATE, allowNull: false },
+      funcionarios: {
+        type: DataTypes.ARRAY(DataTypes.INTEGER),
+        allowNull: false,
+        defaultValue: [],
+      },
+      equipamentos: {
+        type: DataTypes.JSONB,
+        allowNull: false,
+        defaultValue: [],
+      },
+      status: {
+        type: DataTypes.ENUM("agendado", "finalizado", "cancelado"),
+        defaultValue: "agendado",
+      },
+      pontosAtribuidos: { type: DataTypes.INTEGER, defaultValue: 0 },
+    },
+    {
+      tableName: "eventos",
+      schema: "public",
+      freezeTableName: true,
+      timestamps: true,
+    },
+  );
 
-let eventos = [];
-let proximoId = 1;
-
-//Lista todos os eventos, permite filtrar por status, cliente e funcionário
-function listarTodos(filtros = {}) {
-  let resultado = [...eventos];
-
-  if (filtros.status) {
-    resultado = resultado.filter((e) => e.status === filtros.status);
-  }
-
-  if (filtros.clienteId) {
-    resultado = resultado.filter(
-      (e) => e.clienteId === Number(filtros.clienteId),
-    );
-  }
-
-  if (filtros.funcionarioId) {
-    resultado = resultado.filter((e) =>
-      e.funcionarios.includes(Number(filtros.funcionarioId)),
-    );
-  }
-
-  return resultado;
-}
-
-//Busca evento por ID, retorna null se não encontrado
-function buscarPorId(id) {
-  return eventos.find((e) => e.id === id) || null;
-}
-
-//RF03 - Agenda de eventos
-//RF11 - Verifica disponibilidade de equipamentos na data
-//Cria evento e valida campos obrigatórios, disponibilidade de equipamentos e funcionários
-function criar(dados) {
-  const { pacoteId, clienteId, dataHora, funcionarios, equipamentos } = dados;
-
-  if (!pacoteId || !clienteId || !dataHora) {
-    throw new Error("Campos obrigatórios: pacoteId, clienteId, dataHora");
-  }
-
-  if (!Array.isArray(funcionarios) || funcionarios.length === 0) {
-    throw new Error("É necessário ao menos um funcionário no evento");
-  }
-
-  const equipamentosEvento = Array.isArray(equipamentos) ? equipamentos : [];
-
-  if (
-    equipamentosEvento.length > 0 &&
-    !EquipamentoModel.verificarDisponibilidade(
-      equipamentosEvento,
-      eventos,
-      dataHora,
-    )
-  ) {
-    throw new Error("Equipamentos indisponíveis para a data");
-  }
-
-  const novoEvento = {
-    id: proximoId++,
-    pacoteId,
-    clienteId,
-    dataHora,
-    funcionarios,
-    equipamentos: equipamentosEvento,
-    status: "agendado",
-    pontosAtribuidos: dados.pontosAtribuidos || 0,
+  Evento.associate = function (models) {
+    Evento.belongsTo(models.Cliente, { foreignKey: "clienteId", as: "cliente" });
+    Evento.belongsTo(models.Pacote, { foreignKey: "pacoteId", as: "pacote" });
+    Evento.hasMany(models.ContaReceber, { foreignKey: "eventoId", as: "contasReceber" });
+    Evento.hasMany(models.Historico, { foreignKey: "eventoId", as: "historicos" });
+    Evento.hasMany(models.Sugestao, { foreignKey: "eventoId", as: "sugestoes" });
   };
 
-  eventos.push(novoEvento);
-  return novoEvento;
-}
-
-//RF03 - Cancelamento de eventos
-//Cancela evento
-function cancelar(id) {
-  const idx = eventos.findIndex((e) => e.id === id);
-  if (idx === -1) {
-    return false;
-  }
-  eventos[idx].status = "cancelado";
-  return eventos[idx];
-}
-
-//RF03 - Finalização de eventos
-//Finaliza evento
-function finalizar(id) {
-  const idx = eventos.findIndex((e) => e.id === id);
-  if (idx === -1) {
-    return false;
-  }
-
-  eventos[idx].status = "finalizado";
-  return eventos[idx];
-}
-
-//RF03 - Edição de eventos
-//Permite editar evento, valida campos obrigatórios, disponibilidade de equipamentos e funcionários
-function atualizar(id, dados) {
-  const idx = eventos.findIndex((e) => e.id === id);
-  if (idx === -1) {
-    return false;
-  }
-
-  if (eventos[idx].status === "cancelado") {
-    throw new Error("Não é possível editar um evento cancelado");
-  }
-
-  // Se mudar equipamentos ou data, reverifica disponibilidade
-  const novosEquipamentos = dados.equipamentos ?? eventos[idx].equipamentos;
-  const novaData = dados.dataHora ?? eventos[idx].dataHora;
-
-  if (
-    novosEquipamentos.length > 0 &&
-    !EquipamentoModel.verificarDisponibilidade(
-      novosEquipamentos,
-      eventos,
-      novaData,
-      id,
-    )
-  ) {
-    throw new Error("Equipamentos indisponíveis para a data");
-  }
-
-  eventos[idx] = { ...eventos[idx], ...dados, id };
-  return eventos[idx];
-}
-
-//RF04 - Retorna eventos próximos (dentro de 24h) para alertas
-function buscarProximos() {
-  const agora = new Date();
-  const limite = new Date(agora.getTime() + 24 * 60 * 60 * 1000);
-
-  return eventos.filter(
-    (e) =>
-      e.status === "agendado" &&
-      new Date(e.dataHora) >= agora &&
-      new Date(e.dataHora) <= limite,
-  );
-}
-
-//RF11 - Lista equipamentos alocados com o evento correspondente
-function listarEquipamentosAlocados() {
-  const alocacoes = [];
-
-  eventos
-    .filter((e) => e.status !== "cancelado")
-    .forEach((e) => {
-      (e.equipamentos || []).forEach(({ equipamentoId, quantidade }) => {
-        alocacoes.push({
-          eventoId: e.id,
-          dataHora: e.dataHora,
-          status: e.status,
-          equipamentoId,
-          quantidade,
-        });
-      });
-    });
-
-  return alocacoes;
-}
-
-//Remove evento por ID
-function remover(id) {
-  const idx = eventos.findIndex((e) => e.id === id);
-  if (idx === -1) {
-    return false;
-  }
-  eventos.splice(idx, 1);
-  return true;
-}
-
-module.exports = {
-  listarTodos,
-  buscarPorId,
-  criar,
-  cancelar,
-  finalizar,
-  atualizar,
-  buscarProximos,
-  listarEquipamentosAlocados,
-  remover,
+  return Evento;
 };

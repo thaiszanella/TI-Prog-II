@@ -1,159 +1,127 @@
-const EventoModel = require("../models/eventoModel");
-const UsuarioModel = require("../models/usuarioModel");
-const ContaReceberModel = require("../models/contaReceberModel");
-const ContaPagarModel = require("../models/contaPagarModel");
-const FidelidadeModel = require("../models/fidelidadeModel");
+const db = require("../models");
+const { Op } = require("sequelize");
 
-function resumo(req, res) {
-  const eventos = EventoModel.listarTodos();
-  const usuarios = UsuarioModel.listarTodos();
-  const contasReceber = ContaReceberModel.listarTodos();
-  const contasPagar = ContaPagarModel.listarTodos();
-  const fidelidade = FidelidadeModel.listarTodos();
+async function resumo(req, res) {
+  try {
+    const [
+      totalEventos, agendados, finalizados, cancelados,
+      totalUsuarios, admins, funcionarios,
+      totalRecebido, totalPago,
+      clientesComPrograma,
+    ] = await Promise.all([
+      db.Evento.count(),
+      db.Evento.count({ where: { status: "agendado" } }),
+      db.Evento.count({ where: { status: "finalizado" } }),
+      db.Evento.count({ where: { status: "cancelado" } }),
+      db.Usuario.count(),
+      db.Usuario.count({ where: { tipo: "administrador" } }),
+      db.Usuario.count({ where: { tipo: "funcionario" } }),
+      db.ContaReceber.sum("valor", { where: { status: "pago" } }),
+      db.ContaPagar.sum("valor", { where: { status: "pago" } }),
+      db.Fidelidade.count(),
+    ]);
 
-  const totalRecebido = contasReceber
-    .filter((c) => c.status === "pago")
-    .reduce((acc, c) => acc + c.valor, 0);
-
-  const totalPago = contasPagar
-    .filter((c) => c.status === "pago")
-    .reduce((acc, c) => acc + c.valor, 0);
-
-  res.status(200).json({
-    eventos: {
-      total: eventos.length,
-      agendados: eventos.filter((e) => e.status === "agendado").length,
-      finalizados: eventos.filter((e) => e.status === "finalizado").length,
-      cancelados: eventos.filter((e) => e.status === "cancelado").length,
-    },
-    usuarios: {
-      total: usuarios.length,
-      administradores: usuarios.filter((u) => u.tipo === "administrador")
-        .length,
-      funcionarios: usuarios.filter((u) => u.tipo === "funcionario").length,
-    },
-    financeiro: {
-      totalRecebido: parseFloat(totalRecebido.toFixed(2)),
-      totalPago: parseFloat(totalPago.toFixed(2)),
-    },
-    fidelidade: {
-      clientesComPrograma: fidelidade.length,
-    },
-  });
+    res.status(200).json({
+      eventos: { total: totalEventos, agendados, finalizados, cancelados },
+      usuarios: { total: totalUsuarios, administradores: admins, funcionarios },
+      financeiro: {
+        totalRecebido: parseFloat((totalRecebido || 0).toFixed(2)),
+        totalPago: parseFloat((totalPago || 0).toFixed(2)),
+      },
+      fidelidade: { clientesComPrograma },
+    });
+  } catch (err) {
+    res.status(500).json({ erro: "Erro interno" });
+  }
 }
 
-function financeiro(req, res) {
-  const contasReceber = ContaReceberModel.listarTodos();
-  const contasPagar = ContaPagarModel.listarTodos();
+async function financeiro(req, res) {
+  try {
+    const [
+      recTotal, recPendente, recPago, recCancelado,
+      despTotal, despPendente, despPago, despCancelado,
+    ] = await Promise.all([
+      db.ContaReceber.sum("valor"),
+      db.ContaReceber.sum("valor", { where: { status: "pendente" } }),
+      db.ContaReceber.sum("valor", { where: { status: "pago" } }),
+      db.ContaReceber.sum("valor", { where: { status: "cancelado" } }),
+      db.ContaPagar.sum("valor"),
+      db.ContaPagar.sum("valor", { where: { status: "pendente" } }),
+      db.ContaPagar.sum("valor", { where: { status: "pago" } }),
+      db.ContaPagar.sum("valor", { where: { status: "cancelado" } }),
+    ]);
 
-  const despesasTotais = contasPagar.reduce((s, c) => s + c.valor, 0);
+    const fmt = (v) => parseFloat((v || 0).toFixed(2));
 
-  const despesasPendentes = contasPagar
-    .filter((c) => c.status === "pendente")
-    .reduce((s, c) => s + c.valor, 0);
-
-  const despesasPagas = contasPagar
-    .filter((c) => c.status === "pago")
-    .reduce((s, c) => s + c.valor, 0);
-
-  const despesasCanceladas = contasPagar
-    .filter((c) => c.status === "cancelado")
-    .reduce((s, c) => s + c.valor, 0);
-
-  const receitasTotais = contasReceber.reduce((s, c) => s + c.valor, 0);
-
-  const receitasPendentes = contasReceber
-    .filter((c) => c.status === "pendente")
-    .reduce((s, c) => s + c.valor, 0);
-
-  const receitasPagas = contasReceber
-    .filter((c) => c.status === "pago")
-    .reduce((s, c) => s + c.valor, 0);
-
-  const receitasCanceladas = contasReceber
-    .filter((c) => c.status === "cancelado")
-    .reduce((s, c) => s + c.valor, 0);
-
-  res.status(200).json({
-    receitas: {
-      total: parseFloat(receitasTotais.toFixed(2)),
-      pendente: parseFloat(receitasPendentes.toFixed(2)),
-      pago: parseFloat(receitasPagas.toFixed(2)),
-      cancelado: parseFloat(receitasCanceladas.toFixed(2)),
-    },
-    despesas: {
-      total: parseFloat(despesasTotais.toFixed(2)),
-      pendente: parseFloat(despesasPendentes.toFixed(2)),
-      pago: parseFloat(despesasPagas.toFixed(2)),
-      cancelado: parseFloat(despesasCanceladas.toFixed(2)),
-    },
-    saldo: parseFloat((receitasTotais - despesasTotais).toFixed(2)),
-  });
+    res.status(200).json({
+      receitas: { total: fmt(recTotal), pendente: fmt(recPendente), pago: fmt(recPago), cancelado: fmt(recCancelado) },
+      despesas: { total: fmt(despTotal), pendente: fmt(despPendente), pago: fmt(despPago), cancelado: fmt(despCancelado) },
+      saldo: fmt((recTotal || 0) - (despTotal || 0)),
+    });
+  } catch (err) {
+    res.status(500).json({ erro: "Erro interno" });
+  }
 }
 
-function eventos(req, res) {
-  const todosEventos = EventoModel.listarTodos();
-  const proximos = EventoModel.buscarProximos();
+async function eventos(req, res) {
+  try {
+    const agora = new Date();
+    const limite = new Date(agora.getTime() + 24 * 60 * 60 * 1000);
 
-  eventosAgendados = todosEventos.filter((e) => e.status === "agendado").length;
+    const [total, agendados, finalizados, cancelados, proximasVinteQuatroHoras] = await Promise.all([
+      db.Evento.count(),
+      db.Evento.count({ where: { status: "agendado" } }),
+      db.Evento.count({ where: { status: "finalizado" } }),
+      db.Evento.count({ where: { status: "cancelado" } }),
+      db.Evento.count({ where: { status: "agendado", dataHora: { [Op.gte]: agora, [Op.lte]: limite } } }),
+    ]);
 
-  eventosFinalizados = todosEventos.filter(
-    (e) => e.status === "finalizado",
-  ).length;
-
-  eventosCancelados = todosEventos.filter(
-    (e) => e.status === "cancelado",
-  ).length;
-
-  res.status(200).json({
-    porStatus: {
-      agendado: eventosAgendados,
-      finalizado: eventosFinalizados,
-      cancelado: eventosCancelados,
-    },
-    total: todosEventos.length,
-    proximasVinteQuatroHoras: proximos.length,
-  });
+    res.status(200).json({
+      porStatus: { agendado: agendados, finalizado: finalizados, cancelado: cancelados },
+      total,
+      proximasVinteQuatroHoras,
+    });
+  } catch (err) {
+    res.status(500).json({ erro: "Erro interno" });
+  }
 }
 
-function alertas(req, res) {
-  const agora = new Date();
-  const sete_dias = new Date(agora.getTime() + 7 * 24 * 60 * 60 * 1000);
+async function alertas(req, res) {
+  try {
+    const agora = new Date();
+    const limite24h = new Date(agora.getTime() + 24 * 60 * 60 * 1000);
+    const limite7d = new Date(agora.getTime() + 7 * 24 * 60 * 60 * 1000);
 
-  const eventosProximos = EventoModel.buscarProximos();
+    const [
+      eventosProximos,
+      contasReceberVencendo,
+      contasPagarVencendo,
+      contasReceberVencidas,
+      contasPagarVencidas,
+    ] = await Promise.all([
+      db.Evento.findAll({
+        where: { status: "agendado", dataHora: { [Op.gte]: agora, [Op.lte]: limite24h } },
+      }),
+      db.ContaReceber.count({
+        where: { status: "pendente", dataVencimento: { [Op.gte]: agora, [Op.lte]: limite7d } },
+      }),
+      db.ContaPagar.count({
+        where: { status: "pendente", dataVencimento: { [Op.gte]: agora, [Op.lte]: limite7d } },
+      }),
+      db.ContaReceber.count({ where: { status: "pendente", dataVencimento: { [Op.lt]: agora } } }),
+      db.ContaPagar.count({ where: { status: "pendente", dataVencimento: { [Op.lt]: agora } } }),
+    ]);
 
-  const contasReceberVencendo = ContaReceberModel.listarTodos({
-    status: "pendente",
-  }).filter((c) => {
-    const venc = new Date(c.dataVencimento);
-    return venc >= agora && venc <= sete_dias;
-  });
-
-  const contasPagarVencendo = ContaPagarModel.listarTodos({
-    status: "pendente",
-  }).filter((c) => {
-    const venc = new Date(c.dataVencimento);
-    return venc >= agora && venc <= sete_dias;
-  });
-
-  const contasReceberVencidas = ContaReceberModel.listarTodos({
-    status: "pendente",
-  }).filter((c) => new Date(c.dataVencimento) < agora);
-
-  const contasPagarVencidas = ContaPagarModel.listarTodos({
-    status: "pendente",
-  }).filter((c) => new Date(c.dataVencimento) < agora);
-
-  res.status(200).json({
-    eventosProximos: {
-      quantidade: eventosProximos.length,
-      eventos: eventosProximos,
-    },
-    contasReceberVencendo: contasReceberVencendo.length,
-    contasPagarVencendo: contasPagarVencendo.length,
-    contasReceberVencidas: contasReceberVencidas.length,
-    contasPagarVencidas: contasPagarVencidas.length,
-  });
+    res.status(200).json({
+      eventosProximos: { quantidade: eventosProximos.length, eventos: eventosProximos },
+      contasReceberVencendo,
+      contasPagarVencendo,
+      contasReceberVencidas,
+      contasPagarVencidas,
+    });
+  } catch (err) {
+    res.status(500).json({ erro: "Erro interno" });
+  }
 }
 
 module.exports = { resumo, financeiro, eventos, alertas };

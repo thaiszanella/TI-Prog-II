@@ -1,108 +1,157 @@
-const UsuarioModel = require("../models/usuarioModel");
+const db = require("../models");
 
-function listar(req, res) {
-  const usuarios = UsuarioModel.listarTodos(req.query);
-  res.status(200).json({ total: usuarios.length, usuarios });
-}
-
-function buscar(req, res) {
-  const id = parseInt(req.params.id);
-  if (isNaN(id)) {
-    return res.status(400).json({ erro: "ID inválido" });
-  }
-
-  const usuario = UsuarioModel.buscarPorId(id);
-  if (!usuario) {
-    return res.status(404).json({ erro: "Usuário não encontrado" });
-  }
-
-  res.status(200).json(usuario);
-}
-
-function cadastrar(req, res) {
+async function listar(req, res) {
   try {
-    const novoUsuario = UsuarioModel.criar(req.body);
-    res
-      .status(201)
-      .set("Location", "/api/usuarios/" + novoUsuario.id)
-      .json(novoUsuario);
-  } catch (err) {
-    res.status(400).json({ erro: err.message });
-  }
-}
+    const where = {};
+    if (req.query.tipo) {
+      where.tipo = req.query.tipo;
+    }
+    if (req.query.status) {
+      where.status = req.query.status;
+    }
 
-function login(req, res) {
-  const { nome, email, senha } = req.body;
-
-  if ((!nome && !email) || !senha) {
-    return res.status(400).json({
-      erro: "Campos obrigatórios: email ou nome, senha",
+    const usuarios = await db.Usuario.findAll({
+      where,
+      attributes: { exclude: ["senha"] },
     });
+    res.status(200).json({ total: usuarios.length, usuarios });
+  } catch (err) {
+    res.status(500).json({ erro: "Erro interno" });
   }
+}
 
+async function buscar(req, res) {
   try {
-    const usuario = UsuarioModel.login(nome, email, senha);
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ erro: "ID inválido" });
+    }
+
+    const usuario = await db.Usuario.findByPk(id, {
+      attributes: { exclude: ["senha"] },
+    });
 
     if (!usuario) {
+      return res.status(404).json({ erro: "Usuário não encontrado" });
+    }
+
+    res.status(200).json(usuario);
+  } catch (err) {
+    res.status(500).json({ erro: "Erro interno" });
+  }
+}
+
+async function cadastrar(req, res) {
+  try {
+    const usuario = await db.Usuario.create(req.body);
+    const { senha, ...semSenha } = usuario.toJSON();
+    res.status(201).json(semSenha);
+  } catch (err) {
+    if (err.name === "SequelizeUniqueConstraintError") {
+      return res.status(409).json({ erro: "E-mail ou CPF já cadastrado" });
+    }
+    res.status(500).json({ erro: "Erro interno" });
+  }
+}
+
+async function login(req, res) {
+  try {
+    const { nome, email, senha } = req.body;
+
+    if ((!nome && !email) || !senha) {
+      return res
+        .status(400)
+        .json({ erro: "Campos obrigatórios: email ou nome, senha" });
+    }
+
+    const usuario = await db.Usuario.findOne({
+      where: email ? { email } : { nome },
+    });
+
+    if (!usuario || usuario.senha !== senha) {
       return res.status(401).json({ erro: "Credenciais inválidas" });
     }
 
-    res.status(200).json({ mensagem: "Login realizado com sucesso", usuario });
+    if (usuario.status !== "ativo") {
+      return res.status(403).json({ erro: "Conta inativa ou congelada" });
+    }
+
+    const { senha: _, ...semSenha } = usuario.toJSON();
+    res
+      .status(200)
+      .json({ mensagem: "Login realizado com sucesso", usuario: semSenha });
   } catch (err) {
-    res.status(403).json({ erro: err.message });
+    res.status(500).json({ erro: "Erro interno" });
   }
 }
 
-function atualizar(req, res) {
-  const id = parseInt(req.params.id);
-  if (isNaN(id)) {
-    return res.status(400).json({ erro: "ID inválido" });
-  }
-
+async function atualizar(req, res) {
   try {
-    const usuario = UsuarioModel.atualizar(id, req.body);
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ erro: "ID inválido" });
+    }
+
+    const usuario = await db.Usuario.findByPk(id);
     if (!usuario) {
       return res.status(404).json({ erro: "Usuário não encontrado" });
     }
-    res.status(200).json(usuario);
+
+    await usuario.update(req.body);
+    const { senha, ...semSenha } = usuario.toJSON();
+    res.status(200).json(semSenha);
   } catch (err) {
-    res.status(400).json({ erro: err.message });
+    if (err.name === "SequelizeUniqueConstraintError") {
+      return res.status(409).json({ erro: "E-mail já em uso" });
+    }
+    res.status(500).json({ erro: "Erro interno" });
   }
 }
 
-function alterarStatus(req, res) {
-  const id = parseInt(req.params.id);
-  if (isNaN(id)) {
-    return res.status(400).json({ erro: "ID inválido" });
-  }
-
-  const { status } = req.body;
-  if (!status) {
-    return res.status(400).json({ erro: "Campo obrigatório: status" });
-  }
-
+async function alterarStatus(req, res) {
   try {
-    const usuario = UsuarioModel.alterarStatus(id, status);
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ erro: "ID inválido" });
+    }
+
+    const { status } = req.body;
+    const statuses = ["ativo", "congelado", "inativo"];
+    if (!status || !statuses.includes(status)) {
+      return res.status(400).json({
+        erro: "Status inválido. Valores possíveis: ativo, congelado, inativo",
+      });
+    }
+
+    const usuario = await db.Usuario.findByPk(id);
     if (!usuario) {
       return res.status(404).json({ erro: "Usuário não encontrado" });
     }
-    res.status(200).json(usuario);
+
+    await usuario.update({ status });
+    const { senha, ...semSenha } = usuario.toJSON();
+    res.status(200).json(semSenha);
   } catch (err) {
-    res.status(400).json({ erro: err.message });
+    res.status(500).json({ erro: "Erro interno" });
   }
 }
 
-function remover(req, res) {
-  const id = parseInt(req.params.id);
-  if (isNaN(id)) {
-    return res.status(400).json({ erro: "ID inválido" });
-  }
+async function remover(req, res) {
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ erro: "ID inválido" });
+    }
 
-  const ok = UsuarioModel.remover(id);
-  if (!ok) {
-    return res.status(404).json({ erro: "Usuário não encontrado" });
+    const deletado = await db.Usuario.destroy({ where: { id } });
+    if (!deletado) {
+      return res.status(404).json({ erro: "Usuário não encontrado" });
+    }
+
+    res.status(204).send();
+  } catch (err) {
+    res.status(500).json({ erro: "Erro interno" });
   }
-  res.status(204).send();
 }
 
 module.exports = {

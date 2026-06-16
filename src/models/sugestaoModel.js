@@ -1,46 +1,30 @@
-let sugestoes = [];
-let proximoId = 1;
+"use strict";
+module.exports = (sequelize, DataTypes) => {
+  const Sugestao = sequelize.define(
+    "Sugestao",
+    {
+      id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+      eventoId: { type: DataTypes.INTEGER, allowNull: false },
+      usuarioId: { type: DataTypes.INTEGER, allowNull: false },
+      descricao: { type: DataTypes.TEXT, allowNull: false },
+      dataCriacao: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW,
+      },
+    },
+    {
+      tableName: "sugestoes",
+      schema: "public",
+      freezeTableName: true,
+      timestamps: true,
+    },
+  );
 
-//Lista todas as sugestões, com opção de filtro por eventoId ou usuarioId
-function listarTodos(filtros = {}) {
-  let resultado = [...sugestoes];
-  if (filtros.eventoId) {
-    resultado = resultado.filter(
-      (s) => s.eventoId === Number(filtros.eventoId),
-    );
-  }
-
-  if (filtros.usuarioId) {
-    resultado = resultado.filter(
-      (s) => s.usuarioId === Number(filtros.usuarioId),
-    );
-  }
-  return resultado;
-}
-
-//Busca uma sugestão pelo ID, retorna null se não encontrado
-function buscarPorId(id) {
-  return sugestoes.find((s) => s.id === id) || null;
-}
-
-//Cria uma nova sugestão
-function criar(dados) {
-  const { eventoId, usuarioId, descricao } = dados;
-
-  if (!eventoId || !usuarioId || !descricao) {
-    throw new Error("Campos obrigatórios: eventoId, usuarioId e descricao");
-  }
-
-  const novaSugestao = {
-    id: proximoId++,
-    eventoId,
-    usuarioId,
-    descricao,
-    dataCriacao: new Date().toISOString(),
+  Sugestao.associate = function (models) {
+    Sugestao.belongsTo(models.Evento, { foreignKey: "eventoId", as: "evento" });
+    Sugestao.belongsTo(models.Usuario, { foreignKey: "usuarioId", as: "usuario" });
   };
 
-  sugestoes.push(novaSugestao);
-  return novaSugestao;
-}
-
-module.exports = { listarTodos, buscarPorId, criar };
+  return Sugestao;
+};

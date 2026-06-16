@@ -1,101 +1,183 @@
-const EventoModel = require("../models/eventoModel");
+const db = require("../models");
+const { Op } = require("sequelize");
 
-function listar(req, res) {
-  const eventos = EventoModel.listarTodos(req.query);
-  res.status(200).json({ total: eventos.length, eventos });
-}
-
-function buscar(req, res) {
-  const id = parseInt(req.params.id);
-  if (isNaN(id)) {
-    return res.status(400).json({ erro: "ID deve ser um número inteiro" });
-  }
-
-  const evento = EventoModel.buscarPorId(id);
-  if (!evento) {
-    return res.status(404).json({ erro: "Evento não encontrado" });
-  }
-
-  res.status(200).json(evento);
-}
-
-function criar(req, res) {
+async function listar(req, res) {
   try {
-    const novoEvento = EventoModel.criar(req.body);
+    const where = {};
+
+    if (req.query.status) {
+      where.status = req.query.status;
+    }
+
+    if (req.query.clienteId) {
+      where.clienteId = parseInt(req.query.clienteId);
+    }
+
+    if (req.query.funcionarioId) {
+      where.funcionarios = {
+        [Op.contains]: [parseInt(req.query.funcionarioId)],
+      };
+    }
+
+    const eventos = await db.Evento.findAll({ where });
+    res.status(200).json({ total: eventos.length, eventos });
+  } catch (err) {
+    res.status(500).json({ erro: "Erro interno" });
+  }
+}
+
+async function buscar(req, res) {
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ erro: "ID deve ser um número inteiro" });
+    }
+
+    const evento = await db.Evento.findByPk(id);
+    if (!evento) {
+      return res.status(404).json({ erro: "Evento não encontrado" });
+    }
+
+    res.status(200).json(evento);
+  } catch (err) {
+    res.status(500).json({ erro: "Erro interno" });
+  }
+}
+
+async function criar(req, res) {
+  try {
+    const novoEvento = await db.Evento.create(req.body);
     res
       .status(201)
       .set("Location", "/api/eventos/" + novoEvento.id)
       .json(novoEvento);
   } catch (err) {
-    res.status(400).json({ erro: err.message });
+    res.status(500).json({ erro: "Erro interno" });
   }
 }
 
-function atualizar(req, res) {
-  const id = parseInt(req.params.id);
-  if (isNaN(id)) {
-    return res.status(400).json({ erro: "ID inválido" });
-  }
-
+async function atualizar(req, res) {
   try {
-    const evento = EventoModel.atualizar(id, req.body);
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ erro: "ID inválido" });
+    }
+
+    const evento = await db.Evento.findByPk(id);
     if (!evento) {
       return res.status(404).json({ erro: "Evento não encontrado" });
     }
+
+    if (evento.status === "cancelado") {
+      return res
+        .status(400)
+        .json({ erro: "Não é possível editar um evento cancelado" });
+    }
+
+    await evento.update(req.body);
     res.status(200).json(evento);
   } catch (err) {
-    res.status(400).json({ erro: err.message });
+    res.status(500).json({ erro: "Erro interno" });
   }
 }
 
-function cancelar(req, res) {
-  const id = parseInt(req.params.id);
-  if (isNaN(id)) {
-    return res.status(400).json({ erro: "ID inválido" });
-  }
+async function cancelar(req, res) {
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ erro: "ID inválido" });
+    }
 
-  const evento = EventoModel.cancelar(id);
-  if (!evento) {
-    return res.status(404).json({ erro: "Evento não encontrado" });
-  }
+    const evento = await db.Evento.findByPk(id);
+    if (!evento) {
+      return res.status(404).json({ erro: "Evento não encontrado" });
+    }
 
-  res.status(200).json({ mensagem: "Evento cancelado com sucesso", evento });
+    await evento.update({ status: "cancelado" });
+    res.status(200).json({ mensagem: "Evento cancelado com sucesso", evento });
+  } catch (err) {
+    res.status(500).json({ erro: "Erro interno" });
+  }
 }
 
-function finalizar(req, res) {
-  const id = parseInt(req.params.id);
-  if (isNaN(id)) {
-    return res.status(400).json({ erro: "ID inválido" });
-  }
+async function finalizar(req, res) {
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ erro: "ID inválido" });
+    }
 
-  const evento = EventoModel.finalizar(id);
-  if (!evento) {
-    return res.status(404).json({ erro: "Evento não encontrado" });
+    const evento = await db.Evento.findByPk(id);
+    if (!evento) {
+      return res.status(404).json({ erro: "Evento não encontrado" });
+    }
+
+    await evento.update({ status: "finalizado" });
+    res.status(200).json({ mensagem: "Evento finalizado com sucesso", evento });
+  } catch (err) {
+    res.status(500).json({ erro: "Erro interno" });
   }
-  res.status(200).json({ mensagem: "Evento finalizado com sucesso", evento });
 }
 
-function proximos(req, res) {
-  const eventosProximos = EventoModel.buscarProximos();
-  res.status(200).json({ eventos: eventosProximos });
+async function proximos(req, res) {
+  try {
+    const agora = new Date();
+    const limite = new Date(agora.getTime() + 24 * 60 * 60 * 1000);
+
+    const eventos = await db.Evento.findAll({
+      where: {
+        status: "agendado",
+        dataHora: { [Op.gte]: agora, [Op.lte]: limite },
+      },
+    });
+    res.status(200).json({ eventos });
+  } catch (err) {
+    res.status(500).json({ erro: "Erro interno" });
+  }
 }
 
-function equipamentosAlocados(req, res) {
-  const alocacoes = EventoModel.listarEquipamentosAlocados();
-  res.status(200).json({ alocacoes: alocacoes });
+async function equipamentosAlocados(req, res) {
+  try {
+    const eventos = await db.Evento.findAll({
+      where: { status: { [Op.ne]: "cancelado" } },
+      attributes: ["id", "dataHora", "status", "equipamentos"],
+    });
+
+    const alocacoes = [];
+    for (const e of eventos) {
+      for (const { equipamentoId, quantidade } of e.equipamentos || []) {
+        alocacoes.push({
+          eventoId: e.id,
+          dataHora: e.dataHora,
+          status: e.status,
+          equipamentoId,
+          quantidade,
+        });
+      }
+    }
+
+    res.status(200).json({ alocacoes });
+  } catch (err) {
+    res.status(500).json({ erro: "Erro interno" });
+  }
 }
 
-function remover(req, res) {
-  const id = parseInt(req.params.id);
-  if (isNaN(id)) {
-    return res.status(400).json({ erro: "ID inválido" });
-  }
+async function remover(req, res) {
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ erro: "ID inválido" });
+    }
 
-  const ok = EventoModel.remover(id);
-  if (!ok) {
-    return res.status(404).json({ erro: "Evento não encontrado" });
+    const deletado = await db.Evento.destroy({ where: { id } });
+    if (!deletado) {
+      return res.status(404).json({ erro: "Evento não encontrado" });
+    }
+
+    res.status(204).send();
+  } catch (err) {
+    res.status(500).json({ erro: "Erro interno" });
   }
-  res.status(204).send();
 }
 
 module.exports = {

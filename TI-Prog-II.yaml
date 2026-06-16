@@ -38,12 +38,12 @@ collection:
             send: true
             store: true
           rebuildPath: true
-      - url: http://localhost:3000/api/usuarios/1
+      - url: http://localhost:3000/api/usuarios/3
         name: Buscar usuário
         meta:
           id: req_8ad89df7de5946d38b761dbd56d38e3e
           created: 1780776304007
-          modified: 1780776330005
+          modified: 1781653224062
           isPrivate: false
           description: ""
           sortKey: -1780776304007
@@ -133,12 +133,12 @@ collection:
             send: true
             store: true
           rebuildPath: true
-      - url: http://localhost:3000/api/usuarios/2
+      - url: http://localhost:3000/api/usuarios/1
         name: Atualizar usuário
         meta:
           id: req_26ad7580e6f4472f967548a0dba392aa
           created: 1780776658734
-          modified: 1780778895881
+          modified: 1781653122981
           isPrivate: false
           description: ""
           sortKey: -1780776658734
@@ -149,7 +149,7 @@ collection:
             {
             	"cpf": "111.111.111-11",
             	"cep": "89814-010",
-            	"telefone": "49999207066"
+            	"telefone": "49999207096"
             }
         headers:
           - name: Content-Type
@@ -166,12 +166,12 @@ collection:
             send: true
             store: true
           rebuildPath: true
-      - url: http://localhost:3000/api/usuarios/2/status
+      - url: http://localhost:3000/api/usuarios/1/status
         name: Alterar status
         meta:
           id: req_d82e96086f6d4c99897a5c7087d6f715
           created: 1780776760527
-          modified: 1780778881502
+          modified: 1781653175900
           isPrivate: false
           description: ""
           sortKey: -1780776760527
@@ -180,7 +180,7 @@ collection:
           mimeType: application/json
           text: |-
             {
-            	"status": "inativo"
+            	"status": "ativo"
             }
         headers:
           - name: Content-Type
@@ -197,12 +197,12 @@ collection:
             send: true
             store: true
           rebuildPath: true
-      - url: http://localhost:3000/api/usuarios/2
+      - url: http://localhost:3000/api/usuarios/1
         name: Remover usuário
         meta:
           id: req_0c21adeaa8dd4137b3c74cde682a4529
           created: 1780776931728
-          modified: 1780778899121
+          modified: 1781652666254
           isPrivate: false
           description: ""
           sortKey: -1780776931728
@@ -251,12 +251,12 @@ collection:
             send: true
             store: true
           rebuildPath: true
-      - url: http://localhost:3000/api/eventos/1
+      - url: http://localhost:3000/api/eventos/3
         name: Buscar evento
         meta:
           id: req_3cdd85b93c254109a028c1f453d73854
           created: 1780777144022
-          modified: 1780777166110
+          modified: 1781653323775
           isPrivate: false
           description: ""
           sortKey: -1780777144022
@@ -279,7 +279,7 @@ collection:
         meta:
           id: req_9030cf7f67a549b6ba41efab28f84f01
           created: 1780777166960
-          modified: 1780777233203
+          modified: 1781653336114
           isPrivate: false
           description: ""
           sortKey: -1780777166960
@@ -302,7 +302,7 @@ collection:
         meta:
           id: req_b8177ccc61c7423baed4dd54e54e7643
           created: 1780777242347
-          modified: 1780777309446
+          modified: 1781653317378
           isPrivate: false
           description: ""
           sortKey: -1780777242347
@@ -358,12 +358,12 @@ collection:
             send: true
             store: true
           rebuildPath: true
-      - url: http://localhost:3000/api/eventos/1
+      - url: http://localhost:3000/api/eventos/3
         name: Atualizar evento
         meta:
           id: req_c5856434467e4513867a56b40fb1eec6
           created: 1780779136938
-          modified: 1780779236138
+          modified: 1781653276228
           isPrivate: false
           description: ""
           sortKey: -1780779136938
@@ -395,7 +395,7 @@ collection:
         meta:
           id: req_4a1c48795dfd4443b4d48423b9770be2
           created: 1780779241651
-          modified: 1780779289152
+          modified: 1781653287503
           isPrivate: false
           description: ""
           sortKey: -1780779241651
@@ -418,12 +418,12 @@ collection:
             send: true
             store: true
           rebuildPath: true
-      - url: http://localhost:3000/api/eventos/1/finalizar
+      - url: http://localhost:3000/api/eventos/3/finalizar
         name: Finalizar evento
         meta:
           id: req_57c865fc088647658b42e891acbd5209
           created: 1780779295885
-          modified: 1780779317217
+          modified: 1781653293339
           isPrivate: false
           description: ""
           sortKey: -1780779295885
@@ -589,11 +589,11 @@ collection:
         meta:
           id: req_ff92f07e121743ef816e2d0a2efd5194
           created: 1780779543396
-          modified: 1780779683469
+          modified: 1781653374190
           isPrivate: false
           description: ""
           sortKey: -1780779543396
-        method: PUT
+        method: PATCH
         body:
           mimeType: application/json
           text: |-
@@ -726,16 +726,16 @@ collection:
             send: true
             store: true
           rebuildPath: true
-      - url: http://localhost:3000/api/servicos/4
+      - url: http://localhost:3000/api/servicos/1
         name: Atualizar serviço
         meta:
           id: req_17ecf145b02c42ec8a5cb5506942562d
           created: 1780780121658
-          modified: 1780780208761
+          modified: 1781653433669
           isPrivate: false
           description: ""
           sortKey: -1780780121658
-        method: PUT
+        method: PATCH
         body:
           mimeType: application/json
           text: |-
@@ -780,148 +780,6 @@ collection:
             send: true
             store: true
           rebuildPath: true
-      - name: Serviços
-        meta:
-          id: fld_5393a2c5572a4962b4e82456b427ab28
-          created: 1780780445100
-          modified: 1780780467808
-          sortKey: -1780780215107
-          description: ""
-        children:
-          - url: http://localhost:3000/api/servicos
-            name: Criar serviço
-            meta:
-              id: req_07e162045e354d43a08b3a8627dbf349
-              created: 1780780445100
-              modified: 1780780445100
-              isPrivate: false
-              description: ""
-              sortKey: -1780779896056
-            method: POST
-            body:
-              mimeType: application/json
-              text: |-
-                {
-                  "nome": "Formaturas",
-                  "valor": 500.00,
-                  "descricao": "Formaturas",
-                  "notaFiscal": "NF-001"
-                }
-            headers:
-              - name: Content-Type
-                value: application/json
-              - name: User-Agent
-                value: insomnia/12.6.0
-                description: ""
-                disabled: false
-            settings:
-              renderRequestBody: true
-              encodeUrl: true
-              followRedirects: global
-              cookies:
-                send: true
-                store: true
-              rebuildPath: true
-          - url: http://localhost:3000/api/servicos
-            name: Listar serviços
-            meta:
-              id: req_6ecd5128bd5242cf9b9a90d08299aacf
-              created: 1780780445100
-              modified: 1780780445100
-              isPrivate: false
-              description: ""
-              sortKey: -1780779861890
-            method: GET
-            headers:
-              - name: User-Agent
-                value: insomnia/12.6.0
-                description: ""
-                disabled: false
-            settings:
-              renderRequestBody: true
-              encodeUrl: true
-              followRedirects: global
-              cookies:
-                send: true
-                store: true
-              rebuildPath: true
-          - url: http://localhost:3000/api/servicos/4
-            name: Atualizar serviço
-            meta:
-              id: req_95105fbf82374caf955e8c001cfac1a8
-              created: 1780780445100
-              modified: 1780780445100
-              isPrivate: false
-              description: ""
-              sortKey: -1780780121658
-            method: PUT
-            body:
-              mimeType: application/json
-              text: |-
-                {
-                  "valor": 700.00
-                }
-            headers:
-              - name: Content-Type
-                value: application/json
-              - name: User-Agent
-                value: insomnia/12.6.0
-                description: ""
-                disabled: false
-            settings:
-              renderRequestBody: true
-              encodeUrl: true
-              followRedirects: global
-              cookies:
-                send: true
-                store: true
-              rebuildPath: true
-          - url: http://localhost:3000/api/servicos/4
-            name: Remover serviço
-            meta:
-              id: req_e7753369377c4f4ca3c9ee0ba6a03502
-              created: 1780780445100
-              modified: 1780780445100
-              isPrivate: false
-              description: ""
-              sortKey: -1780780215007
-            method: DELETE
-            headers:
-              - name: User-Agent
-                value: insomnia/12.6.0
-                description: ""
-                disabled: false
-            settings:
-              renderRequestBody: true
-              encodeUrl: true
-              followRedirects: global
-              cookies:
-                send: true
-                store: true
-              rebuildPath: true
-          - url: http://localhost:3000/api/servicos/1
-            name: Buscar serviço
-            meta:
-              id: req_eaa128fcf77a4c1bbdb676188611b6de
-              created: 1780780445100
-              modified: 1780780445100
-              isPrivate: false
-              description: ""
-              sortKey: -1780779883787
-            method: GET
-            headers:
-              - name: User-Agent
-                value: insomnia/12.6.0
-                description: ""
-                disabled: false
-            settings:
-              renderRequestBody: true
-              encodeUrl: true
-              followRedirects: global
-              cookies:
-                send: true
-                store: true
-              rebuildPath: true
   - name: Pacotes
     meta:
       id: fld_5a929e7b9e0040848ffafcfaaef190ca
@@ -930,16 +788,16 @@ collection:
       sortKey: -1780779612416.5
       description: ""
     children:
-      - url: http://localhost:3000/api/pacotes/3
+      - url: http://localhost:3000/api/pacotes/1
         name: Atualizar pacote
         meta:
           id: req_394211667fa44417a366d15d3b4f0ec6
           created: 1780780258198
-          modified: 1780780371496
+          modified: 1781653474254
           isPrivate: false
           description: ""
           sortKey: -1780780121658
-        method: PUT
+        method: PATCH
         body:
           mimeType: application/json
           text: |-
@@ -1463,7 +1321,7 @@ collection:
         meta:
           id: req_507f84b672b240eebbc65909a773d6d5
           created: 1780781378124
-          modified: 1780781445572
+          modified: 1781653641886
           isPrivate: false
           description: ""
           sortKey: -1780781378124
@@ -1473,7 +1331,7 @@ collection:
           text: |-
             {
               "clienteId": 2,
-              "pontos": 200
+              "pontos": 2
             }
         headers:
           - name: Content-Type
