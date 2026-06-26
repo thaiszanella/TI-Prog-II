@@ -1,28 +1,28 @@
 const express = require("express");
 const router = express.Router();
-const EquipamentoController = require("../controllers/equipamentoController");
+const ClienteController = require("../controllers/clienteController");
 const autenticar = require("../middlewares/autenticar");
 const autorizar = require("../middlewares/autorizar");
 
-router.get("/", autenticar, EquipamentoController.listar);
-router.get("/:id", autenticar, EquipamentoController.buscar);
+router.get("/", autenticar, ClienteController.listar);
+router.get("/:id", autenticar, ClienteController.buscar);
 router.post(
   "/",
   autenticar,
   autorizar("administrador"),
-  EquipamentoController.criar,
+  ClienteController.criar,
 );
 router.patch(
   "/:id",
   autenticar,
   autorizar("administrador"),
-  EquipamentoController.atualizar,
+  ClienteController.atualizar,
 );
 router.delete(
   "/:id",
   autenticar,
   autorizar("administrador"),
-  EquipamentoController.remover,
+  ClienteController.remover,
 );
 
 module.exports = router;

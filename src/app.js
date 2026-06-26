@@ -1,4 +1,5 @@
 const express = require("express");
+const cookieParser = require("cookie-parser");
 
 const usuarioRoutes = require("./routes/usuarioRoutes");
 const eventoRoutes = require("./routes/eventoRoutes");
@@ -11,10 +12,12 @@ const fidelidadeRoutes = require("./routes/fidelidadeRoutes");
 const historicoRoutes = require("./routes/historicoRoutes");
 const sugestaoRoutes = require("./routes/sugestaoRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
+const clienteRoutes = require("./routes/clienteRoutes");
 
 const app = express();
 
 app.use(express.json());
+app.use(cookieParser());
 
 // Rota de teste, responde a GET/
 app.get("/", (req, res) => {
@@ -36,6 +39,7 @@ app.use("/api/fidelidade", fidelidadeRoutes);
 app.use("/api/historico", historicoRoutes);
 app.use("/api/sugestoes", sugestaoRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/clientes", clienteRoutes);
 
 //Deve ser o último middleware
 app.use((err, req, res, next) => {

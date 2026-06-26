@@ -1,4 +1,8 @@
 const db = require("../models");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+
+const SALT_ROUNDS = 12;
 
 async function listar(req, res) {
   try {
@@ -43,7 +47,13 @@ async function buscar(req, res) {
 
 async function cadastrar(req, res) {
   try {
-    const usuario = await db.Usuario.create(req.body);
+    if (!req.body.senha) {
+      return res.status(400).json({ erro: "Senha é obrigatória" });
+    }
+
+    const senhaHash = await bcrypt.hash(req.body.senha, SALT_ROUNDS);
+    const usuario = await db.Usuario.create({ ...req.body, senha: senhaHash });
+
     const { senha, ...semSenha } = usuario.toJSON();
     res.status(201).json(semSenha);
   } catch (err) {
@@ -68,7 +78,9 @@ async function login(req, res) {
       where: email ? { email } : { nome },
     });
 
-    if (!usuario || usuario.senha !== senha) {
+    const senhaValida = await bcrypt.compare(senha, usuario?.senha);
+
+    if (!usuario || !senhaValida) {
       return res.status(401).json({ erro: "Credenciais inválidas" });
     }
 
@@ -76,10 +88,13 @@ async function login(req, res) {
       return res.status(403).json({ erro: "Conta inativa ou congelada" });
     }
 
-    const { senha: _, ...semSenha } = usuario.toJSON();
-    res
-      .status(200)
-      .json({ mensagem: "Login realizado com sucesso", usuario: semSenha });
+    const token = jwt.sign(
+      { id: usuario.id, tipo: usuario.tipo },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN || "15m" },
+    );
+
+    res.status(200).json({ token });
   } catch (err) {
     res.status(500).json({ erro: "Erro interno" });
   }

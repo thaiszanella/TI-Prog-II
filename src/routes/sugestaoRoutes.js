@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const SugestaoController = require("../controllers/sugestaoController");
+const autenticar = require("../middlewares/autenticar");
 
-router.get("/", SugestaoController.listar);
-router.get("/:id", SugestaoController.buscar);
-router.post("/", SugestaoController.criar);
+router.get("/", autenticar, SugestaoController.listar);
+router.get("/:id", autenticar, SugestaoController.buscar);
+router.post("/", autenticar, SugestaoController.criar);
 
 module.exports = router;
