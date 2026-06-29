@@ -1,5 +1,4 @@
 const express = require("express");
-const cookieParser = require("cookie-parser");
 
 const usuarioRoutes = require("./routes/usuarioRoutes");
 const eventoRoutes = require("./routes/eventoRoutes");
@@ -17,7 +16,6 @@ const clienteRoutes = require("./routes/clienteRoutes");
 const app = express();
 
 app.use(express.json());
-app.use(cookieParser());
 
 // Rota de teste, responde a GET/
 app.get("/", (req, res) => {
