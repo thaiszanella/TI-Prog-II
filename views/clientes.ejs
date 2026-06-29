@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Sistema de gestão de eventos" />
+    <title>Clientes — W2 Sonorização</title>
+    <link rel="stylesheet" href="/css/estilo.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Sistema de Gestão</h1>
+    </header>
+    <nav aria-label="Navegação principal">
+      <ul>
+        <li><a href="/dashboard">Dashboard</a></li>
+        <li><a href="/clientes">Clientes</a></li>
+        <li><a href="/eventos">Eventos</a></li>
+        <li><a href="/servicos">Serviços</a></li>
+        <li><a href="/pacotes">Pacotes</a></li>
+        <li><a href="/financeiro">Financeiro</a></li>
+        <li><a href="/equipamentos">Equipamentos</a></li>
+        <li><a href="/usuarios">Usuários</a></li>
+        <li><a href="/fidelidade">Fidelidade</a></li>
+        <li><a href="/historico">Histórico</a></li>
+        <li><a href="/sugestoes">Sugestões</a></li>
+      </ul>
+    </nav>
+
+    <main>
+      <section aria-labelledby="titulo-clientes">
+        <h2 id="titulo-clientes">Clientes Cadastrados</h2>
+        <ul>
+          <% clientes.forEach(function(c) { %>
+            <li><%= c.nome %> — <%= c.email %></li>
+          <% }); %>
+        </ul>
+      </section>
+    </main>
+
+    <footer>
+      <p>Sistema de Gestão &mdash; Programação II UFFS</p>
+    </footer>
+  </body>
+</html>

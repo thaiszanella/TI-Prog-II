@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Sistema de gestão de eventos" />
+    <title>Login — W2 Sonorização</title>
+    <link rel="stylesheet" href="/css/estilo.css" />
+  </head>
+  <body>
+    <main>
+      <h1>Acesso ao Sistema</h1>
+      <form action="/api/usuarios/login" method="POST">
+
+        <label for="email">E-mail:</label>
+        <input type="email" id="email" name="email"
+               placeholder="seu@email.com" required
+               autocomplete="email">
+
+        <label for="senha">Senha:</label>
+        <input type="password" id="senha" name="senha"
+               required minlength="8"
+               autocomplete="current-password">
+
+        <button type="submit">Entrar</button>
+      </form>
+    </main>
+  </body>
+</html>

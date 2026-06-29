@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Sistema de gestão de eventos" />
+    <title>Dashboard — W2 Sonorização</title>
+    <link rel="stylesheet" href="/css/estilo.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Sistema de Gestão</h1>
+    </header>
+    <nav aria-label="Navegação principal">
+      <ul>
+        <li><a href="/dashboard">Dashboard</a></li>
+        <li><a href="/clientes">Clientes</a></li>
+        <li><a href="/eventos">Eventos</a></li>
+        <li><a href="/servicos">Serviços</a></li>
+        <li><a href="/pacotes">Pacotes</a></li>
+        <li><a href="/financeiro">Financeiro</a></li>
+        <li><a href="/equipamentos">Equipamentos</a></li>
+        <li><a href="/usuarios">Usuários</a></li>
+        <li><a href="/fidelidade">Fidelidade</a></li>
+        <li><a href="/historico">Histórico</a></li>
+        <li><a href="/sugestoes">Sugestões</a></li>
+      </ul>
+    </nav>
+
+    <main>
+      <h2>Dashboard</h2>
+
+      <section aria-labelledby="titulo-eventos-resumo">
+        <h3 id="titulo-eventos-resumo">Eventos</h3>
+        <dl>
+          <dt>Total</dt>
+          <dd><%= dados.eventos.total %></dd>
+          <dt>Agendados</dt>
+          <dd><%= dados.eventos.agendados %></dd>
+          <dt>Finalizados</dt>
+          <dd><%= dados.eventos.finalizados %></dd>
+          <dt>Cancelados</dt>
+          <dd><%= dados.eventos.cancelados %></dd>
+        </dl>
+      </section>
+
+      <section aria-labelledby="titulo-usuarios-resumo">
+        <h3 id="titulo-usuarios-resumo">Usuários</h3>
+        <dl>
+          <dt>Total</dt>
+          <dd><%= dados.usuarios.total %></dd>
+          <dt>Administradores</dt>
+          <dd><%= dados.usuarios.administradores %></dd>
+          <dt>Funcionários</dt>
+          <dd><%= dados.usuarios.funcionarios %></dd>
+        </dl>
+      </section>
+
+      <section aria-labelledby="titulo-financeiro-resumo">
+        <h3 id="titulo-financeiro-resumo">Financeiro</h3>
+        <dl>
+          <dt>Total Recebido</dt>
+          <dd>R$ <%= dados.financeiro.totalRecebido.toFixed(2) %></dd>
+          <dt>Total Pago</dt>
+          <dd>R$ <%= dados.financeiro.totalPago.toFixed(2) %></dd>
+        </dl>
+      </section>
+
+      <section aria-labelledby="titulo-fidelidade-resumo">
+        <h3 id="titulo-fidelidade-resumo">Fidelidade</h3>
+        <dl>
+          <dt>Clientes no Programa</dt>
+          <dd><%= dados.fidelidade.clientesComPrograma %></dd>
+        </dl>
+      </section>
+    </main>
+
+    <footer>
+      <p>Sistema de Gestão &mdash; Programação II UFFS</p>
+    </footer>
+  </body>
+</html>

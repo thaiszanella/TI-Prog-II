@@ -1,4 +1,5 @@
 const express = require("express");
+const path = require("path");
 
 const usuarioRoutes = require("./routes/usuarioRoutes");
 const eventoRoutes = require("./routes/eventoRoutes");
@@ -12,6 +13,7 @@ const historicoRoutes = require("./routes/historicoRoutes");
 const sugestaoRoutes = require("./routes/sugestaoRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const clienteRoutes = require("./routes/clienteRoutes");
+const viewRoutes = require("./routes/viewRoutes");
 
 const app = express();
 
@@ -25,6 +27,12 @@ app.get("/", (req, res) => {
     timestamp: new Date().toISOString(),
   });
 });
+
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "..", "views"));
+app.use(express.static(path.join(__dirname, "..", "public")));
+
+app.use("/", viewRoutes);
 
 app.use("/api/usuarios", usuarioRoutes);
 app.use("/api/eventos", eventoRoutes);
